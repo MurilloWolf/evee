@@ -1,0 +1,216 @@
+/*
+ * evee — import from the host's Tailwind v4 entry CSS, after `@import "tailwindcss"`:
+ *   @import "evee/styles.css";
+ *
+ * Colors are `--evee-*` tokens resolved per color scheme (`data-scheme` on the chat root):
+ *   inherit (default) → host shadcn vars (--primary, --muted, ...) and the host `.dark` class
+ *   light / dark      → forced, ignores host vars
+ *   system            → prefers-color-scheme, ignores host vars
+ * A theme (see `ChatTheme`) sets `--evee-light-*` / `--evee-dark-*`, which win over everything.
+ * Fallbacks are shadcn neutral, so the lib also works without shadcn.
+ *
+ * Generated token blocks: keep the token list in sync with `THEME_TOKENS` (src/react/theme.ts).
+ */
+@source "./react";
+
+@theme inline {
+  --color-evee-background: var(--evee-background);
+  --color-evee-foreground: var(--evee-foreground);
+  --color-evee-card: var(--evee-card);
+  --color-evee-primary: var(--evee-primary);
+  --color-evee-primary-foreground: var(--evee-primary-foreground);
+  --color-evee-secondary: var(--evee-secondary);
+  --color-evee-secondary-foreground: var(--evee-secondary-foreground);
+  --color-evee-muted: var(--evee-muted);
+  --color-evee-muted-foreground: var(--evee-muted-foreground);
+  --color-evee-accent: var(--evee-accent);
+  --color-evee-accent-foreground: var(--evee-accent-foreground);
+  --color-evee-border: var(--evee-border);
+  --color-evee-input: var(--evee-input);
+  --color-evee-ring: var(--evee-ring);
+  --color-evee-destructive: var(--evee-destructive);
+  --color-evee-warning: var(--evee-warning);
+  --color-evee-bubble-own: var(--evee-bubble-own);
+  --color-evee-bubble-own-foreground: var(--evee-bubble-own-foreground);
+  --color-evee-bubble-other: var(--evee-bubble-other);
+  --color-evee-bubble-other-foreground: var(--evee-bubble-other-foreground);
+}
+
+@theme {
+  --animate-evee-message-in: evee-message-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-evee-fade-in: evee-fade-in 200ms ease-out both;
+  --animate-evee-typing: evee-typing 1.2s ease-in-out infinite;
+  --animate-evee-panel-in: evee-panel-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-evee-panel-out: evee-panel-out 160ms ease-in both;
+  --animate-evee-pop: evee-pop 420ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  --animate-evee-ring: evee-ring 1s ease-out 2;
+  --animate-evee-wiggle: evee-wiggle 600ms ease-in-out;
+  --animate-evee-spin-in: evee-spin-in 220ms ease-out both;
+  --animate-evee-slide-up: evee-slide-up 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes evee-message-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  }
+  @keyframes evee-fade-in {
+    from { opacity: 0; }
+  }
+  @keyframes evee-typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+  @keyframes evee-panel-in {
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  }
+  @keyframes evee-panel-out {
+    to { opacity: 0; transform: translateY(16px) scale(0.96); }
+  }
+  @keyframes evee-pop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  @keyframes evee-ring {
+    from { opacity: 0.6; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.6); }
+  }
+  @keyframes evee-wiggle {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-14deg); }
+    40% { transform: rotate(12deg); }
+    60% { transform: rotate(-8deg); }
+    80% { transform: rotate(4deg); }
+  }
+  @keyframes evee-spin-in {
+    from { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+  }
+  @keyframes evee-slide-up {
+    from { opacity: 0; transform: translateY(10px); }
+  }
+}
+
+/* inherit (default): host tokens, light. Also on :root so standalone components (Button...) work outside <Chat />. */
+:root,
+.evee {
+  color-scheme: light;
+  --evee-background: var(--evee-light-background, var(--background, oklch(1 0 0)));
+  --evee-foreground: var(--evee-light-foreground, var(--foreground, oklch(0.145 0 0)));
+  --evee-card: var(--evee-light-card, var(--card, oklch(1 0 0)));
+  --evee-primary: var(--evee-light-primary, var(--primary, oklch(0.205 0 0)));
+  --evee-primary-foreground: var(--evee-light-primary-foreground, var(--primary-foreground, oklch(0.985 0 0)));
+  --evee-secondary: var(--evee-light-secondary, var(--secondary, oklch(0.97 0 0)));
+  --evee-secondary-foreground: var(--evee-light-secondary-foreground, var(--secondary-foreground, oklch(0.205 0 0)));
+  --evee-muted: var(--evee-light-muted, var(--muted, oklch(0.97 0 0)));
+  --evee-muted-foreground: var(--evee-light-muted-foreground, var(--muted-foreground, oklch(0.556 0 0)));
+  --evee-accent: var(--evee-light-accent, var(--accent, oklch(0.97 0 0)));
+  --evee-accent-foreground: var(--evee-light-accent-foreground, var(--accent-foreground, oklch(0.205 0 0)));
+  --evee-border: var(--evee-light-border, var(--border, oklch(0.922 0 0)));
+  --evee-input: var(--evee-light-input, var(--input, oklch(0.922 0 0)));
+  --evee-ring: var(--evee-light-ring, var(--ring, oklch(0.708 0 0)));
+  --evee-destructive: var(--evee-light-destructive, var(--destructive, oklch(0.577 0.245 27.325)));
+  --evee-warning: var(--evee-light-warning, var(--warning, oklch(0.666 0.179 58.318)));
+  --evee-bubble-own: var(--evee-light-bubble-own, var(--evee-primary));
+  --evee-bubble-own-foreground: var(--evee-light-bubble-own-foreground, var(--evee-primary-foreground));
+  --evee-bubble-other: var(--evee-light-bubble-other, var(--evee-muted));
+  --evee-bubble-other-foreground: var(--evee-light-bubble-other-foreground, var(--evee-foreground));
+}
+
+/* inherit: host in dark mode (.dark ancestor, as next-themes / shadcn do) */
+.dark,
+.dark .evee[data-scheme="inherit"] {
+  color-scheme: dark;
+  --evee-background: var(--evee-dark-background, var(--background, oklch(0.145 0 0)));
+  --evee-foreground: var(--evee-dark-foreground, var(--foreground, oklch(0.985 0 0)));
+  --evee-card: var(--evee-dark-card, var(--card, oklch(0.205 0 0)));
+  --evee-primary: var(--evee-dark-primary, var(--primary, oklch(0.922 0 0)));
+  --evee-primary-foreground: var(--evee-dark-primary-foreground, var(--primary-foreground, oklch(0.205 0 0)));
+  --evee-secondary: var(--evee-dark-secondary, var(--secondary, oklch(0.269 0 0)));
+  --evee-secondary-foreground: var(--evee-dark-secondary-foreground, var(--secondary-foreground, oklch(0.985 0 0)));
+  --evee-muted: var(--evee-dark-muted, var(--muted, oklch(0.269 0 0)));
+  --evee-muted-foreground: var(--evee-dark-muted-foreground, var(--muted-foreground, oklch(0.708 0 0)));
+  --evee-accent: var(--evee-dark-accent, var(--accent, oklch(0.269 0 0)));
+  --evee-accent-foreground: var(--evee-dark-accent-foreground, var(--accent-foreground, oklch(0.985 0 0)));
+  --evee-border: var(--evee-dark-border, var(--border, oklch(1 0 0 / 10%)));
+  --evee-input: var(--evee-dark-input, var(--input, oklch(1 0 0 / 15%)));
+  --evee-ring: var(--evee-dark-ring, var(--ring, oklch(0.556 0 0)));
+  --evee-destructive: var(--evee-dark-destructive, var(--destructive, oklch(0.704 0.191 22.216)));
+  --evee-warning: var(--evee-dark-warning, var(--warning, oklch(0.828 0.189 84.429)));
+  --evee-bubble-own: var(--evee-dark-bubble-own, var(--evee-primary));
+  --evee-bubble-own-foreground: var(--evee-dark-bubble-own-foreground, var(--evee-primary-foreground));
+  --evee-bubble-other: var(--evee-dark-bubble-other, var(--evee-muted));
+  --evee-bubble-other-foreground: var(--evee-dark-bubble-other-foreground, var(--evee-foreground));
+}
+
+.evee[data-scheme="light"],
+.evee[data-scheme="system"] {
+  color-scheme: light;
+  --evee-background: var(--evee-light-background, oklch(1 0 0));
+  --evee-foreground: var(--evee-light-foreground, oklch(0.145 0 0));
+  --evee-card: var(--evee-light-card, oklch(1 0 0));
+  --evee-primary: var(--evee-light-primary, oklch(0.205 0 0));
+  --evee-primary-foreground: var(--evee-light-primary-foreground, oklch(0.985 0 0));
+  --evee-secondary: var(--evee-light-secondary, oklch(0.97 0 0));
+  --evee-secondary-foreground: var(--evee-light-secondary-foreground, oklch(0.205 0 0));
+  --evee-muted: var(--evee-light-muted, oklch(0.97 0 0));
+  --evee-muted-foreground: var(--evee-light-muted-foreground, oklch(0.556 0 0));
+  --evee-accent: var(--evee-light-accent, oklch(0.97 0 0));
+  --evee-accent-foreground: var(--evee-light-accent-foreground, oklch(0.205 0 0));
+  --evee-border: var(--evee-light-border, oklch(0.922 0 0));
+  --evee-input: var(--evee-light-input, oklch(0.922 0 0));
+  --evee-ring: var(--evee-light-ring, oklch(0.708 0 0));
+  --evee-destructive: var(--evee-light-destructive, oklch(0.577 0.245 27.325));
+  --evee-warning: var(--evee-light-warning, oklch(0.666 0.179 58.318));
+  --evee-bubble-own: var(--evee-light-bubble-own, var(--evee-primary));
+  --evee-bubble-own-foreground: var(--evee-light-bubble-own-foreground, var(--evee-primary-foreground));
+  --evee-bubble-other: var(--evee-light-bubble-other, var(--evee-muted));
+  --evee-bubble-other-foreground: var(--evee-light-bubble-other-foreground, var(--evee-foreground));
+}
+
+.evee[data-scheme="dark"] {
+  color-scheme: dark;
+  --evee-background: var(--evee-dark-background, oklch(0.145 0 0));
+  --evee-foreground: var(--evee-dark-foreground, oklch(0.985 0 0));
+  --evee-card: var(--evee-dark-card, oklch(0.205 0 0));
+  --evee-primary: var(--evee-dark-primary, oklch(0.922 0 0));
+  --evee-primary-foreground: var(--evee-dark-primary-foreground, oklch(0.205 0 0));
+  --evee-secondary: var(--evee-dark-secondary, oklch(0.269 0 0));
+  --evee-secondary-foreground: var(--evee-dark-secondary-foreground, oklch(0.985 0 0));
+  --evee-muted: var(--evee-dark-muted, oklch(0.269 0 0));
+  --evee-muted-foreground: var(--evee-dark-muted-foreground, oklch(0.708 0 0));
+  --evee-accent: var(--evee-dark-accent, oklch(0.269 0 0));
+  --evee-accent-foreground: var(--evee-dark-accent-foreground, oklch(0.985 0 0));
+  --evee-border: var(--evee-dark-border, oklch(1 0 0 / 10%));
+  --evee-input: var(--evee-dark-input, oklch(1 0 0 / 15%));
+  --evee-ring: var(--evee-dark-ring, oklch(0.556 0 0));
+  --evee-destructive: var(--evee-dark-destructive, oklch(0.704 0.191 22.216));
+  --evee-warning: var(--evee-dark-warning, oklch(0.828 0.189 84.429));
+  --evee-bubble-own: var(--evee-dark-bubble-own, var(--evee-primary));
+  --evee-bubble-own-foreground: var(--evee-dark-bubble-own-foreground, var(--evee-primary-foreground));
+  --evee-bubble-other: var(--evee-dark-bubble-other, var(--evee-muted));
+  --evee-bubble-other-foreground: var(--evee-dark-bubble-other-foreground, var(--evee-foreground));
+}
+
+@media (prefers-color-scheme: dark) {
+  .evee[data-scheme="system"] {
+    color-scheme: dark;
+    --evee-background: var(--evee-dark-background, oklch(0.145 0 0));
+    --evee-foreground: var(--evee-dark-foreground, oklch(0.985 0 0));
+    --evee-card: var(--evee-dark-card, oklch(0.205 0 0));
+    --evee-primary: var(--evee-dark-primary, oklch(0.922 0 0));
+    --evee-primary-foreground: var(--evee-dark-primary-foreground, oklch(0.205 0 0));
+    --evee-secondary: var(--evee-dark-secondary, oklch(0.269 0 0));
+    --evee-secondary-foreground: var(--evee-dark-secondary-foreground, oklch(0.985 0 0));
+    --evee-muted: var(--evee-dark-muted, oklch(0.269 0 0));
+    --evee-muted-foreground: var(--evee-dark-muted-foreground, oklch(0.708 0 0));
+    --evee-accent: var(--evee-dark-accent, oklch(0.269 0 0));
+    --evee-accent-foreground: var(--evee-dark-accent-foreground, oklch(0.985 0 0));
+    --evee-border: var(--evee-dark-border, oklch(1 0 0 / 10%));
+    --evee-input: var(--evee-dark-input, oklch(1 0 0 / 15%));
+    --evee-ring: var(--evee-dark-ring, oklch(0.556 0 0));
+    --evee-destructive: var(--evee-dark-destructive, oklch(0.704 0.191 22.216));
+    --evee-warning: var(--evee-dark-warning, oklch(0.828 0.189 84.429));
+    --evee-bubble-own: var(--evee-dark-bubble-own, var(--evee-primary));
+    --evee-bubble-own-foreground: var(--evee-dark-bubble-own-foreground, var(--evee-primary-foreground));
+    --evee-bubble-other: var(--evee-dark-bubble-other, var(--evee-muted));
+    --evee-bubble-other-foreground: var(--evee-dark-bubble-other-foreground, var(--evee-foreground));
+  }
+}
