@@ -64,8 +64,10 @@ export interface ChatConfig {
   showAuthorName: boolean;
   theme: ChatTheme | null;
   colorScheme: ColorScheme;
-  /** Origins whose links become clickable. Everything else renders as plain text. */
+  /** Origins whose links become clickable (internal: emit `linkClick`). */
   allowedLinkOrigins: string[];
+  /** Also make http(s) links to other origins clickable, opened in a new tab. Default false. */
+  externalLinks: boolean;
 }
 
 export interface ChatHeaderState {

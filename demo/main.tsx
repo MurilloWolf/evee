@@ -95,9 +95,15 @@ const chat = createChat({
     { id: "m2", authorId: admin.id, text: "Oi Ana! Qual consulta?", createdAt: ago(60 * 25 - 2) },
     { id: "m3", authorId: me.id, text: "A do paciente das 14h.", createdAt: ago(12) },
     {
+      id: "m3b",
+      authorId: admin.id,
+      text: "Formatação: **negrito**, _itálico_, ~~riscado~~, `código` e **_misto_** 🙂\n```\nPOST /support/messages\n```",
+      createdAt: ago(11),
+    },
+    {
       id: "m4",
       authorId: admin.id,
-      text: "Veja [a agenda do Dr. Carlos](/schedules/123?doctorId=42) ou o caminho direto /schedules/123?doctorId=42\nLink externo vira texto: https://evil.example.com/login",
+      text: "Veja [a agenda do Dr. Carlos](/schedules/123?doctorId=42) ou o caminho direto /schedules/123?doctorId=42\nLink externo: [painel em produção](https://smart-clinic-delta.vercel.app/login)",
       createdAt: ago(10),
     },
   ],
@@ -306,6 +312,9 @@ function Controls({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
       </Section>
 
       <Section title="Visual">
+        <Button size="sm" variant="outline" onClick={() => chat.setConfig({ externalLinks: !state.config.externalLinks })}>
+          externalLinks: {String(state.config.externalLinks)}
+        </Button>
         <Button size="sm" variant="outline" onClick={() => chat.setConfig({ showAuthorName: !state.config.showAuthorName })}>
           authorName: {String(state.config.showAuthorName)}
         </Button>

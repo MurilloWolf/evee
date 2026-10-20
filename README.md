@@ -10,7 +10,7 @@ Stack: React ≥ 18, Tailwind v4. Herda o tema shadcn do host por padrão.
 
 ```jsonc
 // package.json
-"evee": "github:MurilloWolf/evee#v0.1.0"
+"evee": "github:MurilloWolf/evee#v0.2.0"
 ```
 
 ```ts
@@ -85,7 +85,7 @@ const chat = createChat({ ..., open: false }); // começa fechado
 | Header | `setTitle(t)`, `setSubtitle(t)`, `setAvatar(url \| null)`, `setHeader(header \| null)` |
 | Widget | `open()`, `close()`, `toggle()`, `setUnreadCount(n)` |
 | Tema | `setTheme(theme \| null)`, `setColorScheme(scheme)` |
-| Visual | `setConfig({ showAvatars, showTimestamps, showAuthorName, locale, allowedLinkOrigins, ... })`, `setTyping(user \| null)`, `setUnreadMarker(id \| null)`, `scrollToBottom()` |
+| Visual | `setConfig({ showAvatars, showTimestamps, showAuthorName, locale, allowedLinkOrigins, externalLinks, ... })`, `setTyping(user \| null)`, `setUnreadMarker(id \| null)`, `scrollToBottom()` |
 | Histórico | `setHasMore(bool)`, `loadMore()`: dispara o evento `loadMore`, e o host responde com `prependMessages` |
 | Leitura | `getState()`, `subscribe(fn)`, `on(evento, fn)` → retorna a função de unsubscribe; hook `useChat(chat)` |
 
@@ -124,10 +124,27 @@ chat.setColorScheme("dark");    // "inherit" | "light" | "dark" | "system"
 
 Há animação na entrada de mensagens novas (o histórico não anima), no "digitando...", na abertura e no fechamento do widget, e no widget fechado ao chegar mensagem (ícone balança, anel pulsa, badge pulsa, prévia sobe). Todas são CSS e ficam desligadas com `prefers-reduced-motion`.
 
+## Formatação
+
+O texto das mensagens aceita um markdown leve. Ele é renderizado como elementos React, nunca como HTML:
+
+| Escrito | Resultado |
+| --- | --- |
+| `**texto**` | **negrito** |
+| `_texto_` ou `*texto*` | _itálico_ |
+| `~~texto~~` | ~~riscado~~ |
+| `` `código` `` | código inline |
+| ` ``` ` bloco ` ``` ` | bloco de código |
+| `[rótulo](url)` | link (ver abaixo) |
+
+- **Ordem de leitura:** código primeiro, depois links, depois ênfase. Assim nada dentro de código ou de uma URL é estilizado, e `snake_case` e `5 * 3 * 2` continuam como texto.
+- **Função:** o parser é exportado como `parseMessage(text, allowedOrigins, { allowExternal })`.
+
 ## Links
 
 - **Formato:** links em markdown (`[Abrir agenda](/schedules/1?doctorId=2)`) mostram só o texto, dentro de um chip (`MessageLink`). URLs soltas mostram o caminho, encurtado.
 - **Origem permitida:** um link só fica clicável se a origem estiver em `allowedLinkOrigins`. Fora disso, ele vira texto, e no formato markdown aparece como `texto (url)`, para o destino real ficar visível.
+- **Links externos:** com `externalLinks: true` (padrão `false`), links http(s) de outras origens também ficam clicáveis. Eles abrem em nova aba, com `rel="noopener noreferrer"` e ícone de link externo, e não disparam `linkClick`. `javascript:`, `data:` etc. nunca viram link.
 - **Customização:** `components={{ Link }}` troca o chip; `linkComponent={NextLink}` troca a âncora usada por baixo.
 
 ## Desenvolvimento

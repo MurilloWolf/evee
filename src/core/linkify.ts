@@ -9,7 +9,16 @@ export type TextSegment =
       url: URL;
       /** true for "[label](url)", false for a bare URL/path. */
       markdown: boolean;
+      /** Origin outside `allowedOrigins` (only when `allowExternal`). */
+      external: boolean;
     };
+
+export interface LinkifyOptions {
+  /** Base for app-relative paths. Defaults to the first allowed origin. */
+  base?: string;
+  /** Also link http(s) URLs from other origins, flagged `external`. */
+  allowExternal?: boolean;
+}
 
 // [label](url) | absolute http(s) URL | app-relative path ("/schedules/1?x=2").
 const LINK_RE =
@@ -20,11 +29,12 @@ const TRAILING = /[.,;:!?)\]]+$/;
 /**
  * Splits text into plain/link segments. Supports markdown-style `[label](url)`,
  * absolute http(s) URLs and app-relative paths. Only URLs whose origin is in
- * `allowedOrigins` become links; anything else stays as text (anti-phishing).
+ * `allowedOrigins` become links, unless `allowExternal` (then other http(s)
+ * origins become links flagged `external`); anything else stays as text.
  * A disallowed `[label](url)` renders as "label (url)" so the real target is visible.
  */
-export function linkify(text: string, allowedOrigins: string[], base?: string): TextSegment[] {
-  const origin = base ?? allowedOrigins[0];
+export function linkify(text: string, allowedOrigins: string[], options: LinkifyOptions = {}): TextSegment[] {
+  const origin = options.base ?? allowedOrigins[0];
   const segments: TextSegment[] = [];
   let last = 0;
   const pushText = (value: string) => {
@@ -40,10 +50,13 @@ export function linkify(text: string, allowedOrigins: string[], base?: string): 
     const raw = markdown ? whole : whole.replace(TRAILING, "");
     const href = markdown ? mdHref! : raw;
     const start = match.index;
-    const url = toAllowedUrl(href, allowedOrigins, origin);
+    const url = toUrl(href, origin);
+    const internal = !!url && allowedOrigins.includes(url.origin);
+    const allowed = !!url && (internal || !!options.allowExternal);
 
     pushText(text.slice(last, start));
-    if (url) segments.push({ type: "link", value: raw, label: markdown ? mdLabel.trim() : raw, url, markdown });
+    if (allowed)
+      segments.push({ type: "link", value: raw, label: markdown ? mdLabel.trim() : raw, url, markdown, external: !internal });
     else pushText(markdown ? `${mdLabel} (${href})` : raw);
     last = start + raw.length;
   }
@@ -51,11 +64,11 @@ export function linkify(text: string, allowedOrigins: string[], base?: string): 
   return segments;
 }
 
-function toAllowedUrl(raw: string, allowedOrigins: string[], base?: string): URL | null {
+/** Parses http(s) only; anything else (javascript:, data:, mailto:...) is rejected. */
+function toUrl(raw: string, base?: string): URL | null {
   try {
     const url = base ? new URL(raw, base) : new URL(raw);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-    return allowedOrigins.includes(url.origin) ? url : null;
+    return url.protocol === "http:" || url.protocol === "https:" ? url : null;
   } catch {
     return null;
   }

@@ -1,6 +1,6 @@
 import type { ComponentType, MouseEvent, ReactNode } from "react";
 import { cn } from "./cn";
-import { LinkIcon } from "./icons";
+import { ExternalLinkIcon, LinkIcon } from "./icons";
 
 /** Underlying anchor (e.g. next/link). Defaults to <a>. */
 export type LinkComponent = ComponentType<{
@@ -8,6 +8,8 @@ export type LinkComponent = ComponentType<{
   className?: string;
   children: ReactNode;
   onClick?: (e: MouseEvent<HTMLAnchorElement>) => void;
+  target?: string;
+  rel?: string;
 }>;
 
 export interface MessageLinkProps {
@@ -16,6 +18,8 @@ export interface MessageLinkProps {
   label: string;
   url: URL;
   markdown: boolean;
+  /** Other origin: opens in a new tab, no `linkClick`. */
+  external?: boolean;
   /** Inside the current user's bubble (adjusts contrast). */
   own: boolean;
   onClick?: (e: MouseEvent<HTMLAnchorElement>) => void;
@@ -24,12 +28,15 @@ export interface MessageLinkProps {
 }
 
 /** Link chip inside a message. `[Abrir agenda](/schedules/1)` shows only "Abrir agenda". */
-export function MessageLink({ href, label, url, markdown, own, onClick, linkComponent, className }: MessageLinkProps) {
-  const Anchor = linkComponent ?? ("a" as unknown as LinkComponent);
+export function MessageLink({ href, label, url, markdown, external = false, own, onClick, linkComponent, className }: MessageLinkProps) {
+  // External links never go through the host's router component.
+  const Anchor = external ? ("a" as unknown as LinkComponent) : (linkComponent ?? ("a" as unknown as LinkComponent));
+  const Icon = external ? ExternalLinkIcon : LinkIcon;
   return (
     <Anchor
       href={href}
-      onClick={onClick}
+      onClick={external ? undefined : onClick}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={cn(
         "mx-0.5 inline-flex max-w-full items-center gap-1 rounded-md px-1.5 py-0.5 align-baseline font-medium no-underline transition-colors",
         own
@@ -38,10 +45,10 @@ export function MessageLink({ href, label, url, markdown, own, onClick, linkComp
         className,
       )}
     >
-      <LinkIcon className="size-3.5 shrink-0" aria-hidden />
+      <Icon className="size-3.5 shrink-0" aria-hidden />
       {/* Bare URLs show just the path, truncated; the full URL is in the tooltip. */}
       <span className="truncate" title={markdown ? url.href : undefined}>
-        {markdown ? label : shorten(url)}
+        {markdown ? label : external ? url.host + shorten(url) : shorten(url)}
       </span>
     </Anchor>
   );

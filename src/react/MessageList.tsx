@@ -173,6 +173,7 @@ export function MessageList({
                   LinkComponent={LinkC}
                   locale={config.locale}
                   allowedLinkOrigins={config.allowedLinkOrigins}
+                  externalLinks={config.externalLinks}
                   labels={labels}
                   linkComponent={linkComponent}
                   onLinkClick={onLinkClick}

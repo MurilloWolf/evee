@@ -1,5 +1,5 @@
 import type { ComponentType, MouseEvent, ReactNode } from "react";
-import { linkify } from "../core/linkify";
+import { parseMessage, type RichNode } from "../core/format";
 import type { ChatMessage, ChatUser } from "../core/types";
 import { Avatar } from "./Avatar";
 import { CheckIcon, ClockIcon, RetryIcon } from "./icons";
@@ -32,6 +32,8 @@ export interface MessageBubbleProps {
   animate?: boolean;
   locale: string;
   allowedLinkOrigins: string[];
+  /** Make links to other origins clickable (new tab). */
+  externalLinks?: boolean;
   labels: ChatLabels;
   linkComponent?: LinkComponent;
   LinkComponent?: ComponentType<MessageLinkProps>;
@@ -54,6 +56,7 @@ export function MessageBubble({
   animate = false,
   locale,
   allowedLinkOrigins,
+  externalLinks = false,
   labels,
   linkComponent,
   LinkComponent: LinkC = MessageLink,
@@ -64,6 +67,47 @@ export function MessageBubble({
   classNames = {},
 }: MessageBubbleProps) {
   const failed = message.status === "failed";
+
+  const renderNodes = (nodes: RichNode[]): ReactNode[] =>
+    nodes.map((node, i) => {
+      switch (node.type) {
+        case "text":
+          return node.value;
+        case "bold":
+          return <strong key={i} className="font-semibold">{renderNodes(node.children)}</strong>;
+        case "italic":
+          return <em key={i}>{renderNodes(node.children)}</em>;
+        case "strike":
+          return <s key={i}>{renderNodes(node.children)}</s>;
+        case "code":
+          return (
+            <code key={i} className="rounded bg-current/10 px-1 py-0.5 font-mono text-[0.85em]">
+              {node.value}
+            </code>
+          );
+        case "code-block":
+          return (
+            <pre key={i} className="my-1 overflow-x-auto rounded-md bg-current/10 p-2 font-mono text-xs whitespace-pre">
+              <code>{node.value}</code>
+            </pre>
+          );
+        case "link":
+          return (
+            <LinkC
+              key={i}
+              href={node.url.href}
+              label={node.label}
+              url={node.url}
+              markdown={node.markdown}
+              external={node.external}
+              own={own}
+              linkComponent={linkComponent}
+              className={classNames.link}
+              onClick={(e) => onLinkClick?.(node.url, message, e)}
+            />
+          );
+      }
+    });
   const pending = message.status === "pending";
 
   // Time + delivery status, shown in the bubble's bottom-right corner (WhatsApp style).
@@ -111,24 +155,7 @@ export function MessageBubble({
             classNames.bubble,
           )}
         >
-          {children ??
-            linkify(message.text, allowedLinkOrigins).map((seg, i) =>
-              seg.type === "text" ? (
-                seg.value
-              ) : (
-                <LinkC
-                  key={i}
-                  href={seg.url.href}
-                  label={seg.label}
-                  url={seg.url}
-                  markdown={seg.markdown}
-                  own={own}
-                  linkComponent={linkComponent}
-                  className={classNames.link}
-                  onClick={(e) => onLinkClick?.(seg.url, message, e)}
-                />
-              ),
-            )}
+          {children ?? renderNodes(parseMessage(message.text, allowedLinkOrigins, { allowExternal: externalLinks }))}
           {meta && (
             <>
               {/* Invisible copy reserves room at the end of the last line; it wraps to a new line when needed. */}

@@ -7,7 +7,7 @@ describe("linkify", () => {
   it("links allowed absolute URLs and strips trailing punctuation", () => {
     expect(linkify(`veja ${app}/schedules/1.`, [app])).toEqual([
       { type: "text", value: "veja " },
-      { type: "link", value: `${app}/schedules/1`, label: `${app}/schedules/1`, url: new URL(`${app}/schedules/1`), markdown: false },
+      { type: "link", value: `${app}/schedules/1`, label: `${app}/schedules/1`, url: new URL(`${app}/schedules/1`), markdown: false, external: false },
       { type: "text", value: "." },
     ]);
   });
@@ -28,6 +28,7 @@ describe("linkify", () => {
         label: "a agenda do Dr. X",
         url: new URL(`${app}/schedules/1?doctorId=2`),
         markdown: true,
+        external: false,
       },
       { type: "text", value: "." },
     ]);
@@ -48,5 +49,11 @@ describe("linkify", () => {
 
   it("returns text only when no origin is allowed", () => {
     expect(linkify("/schedules/1", [])).toEqual([{ type: "text", value: "/schedules/1" }]);
+  });
+
+  it("allowExternal links other http(s) origins, flagged external; still rejects javascript:", () => {
+    const segs = linkify("veja [o login](https://other.app/login) ou javascript:alert(1)", [app], { allowExternal: true });
+    expect(segs[1]).toMatchObject({ type: "link", label: "o login", external: true, markdown: true });
+    expect(segs.at(-1)).toEqual({ type: "text", value: " ou javascript:alert(1)" });
   });
 });

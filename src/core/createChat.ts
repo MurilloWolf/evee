@@ -28,6 +28,7 @@ const DEFAULT_CONFIG: ChatConfig = {
   showAuthorName: false,
   theme: null,
   colorScheme: "inherit",
+  externalLinks: false,
   allowedLinkOrigins: typeof window !== "undefined" ? [window.location.origin] : [],
 };
 

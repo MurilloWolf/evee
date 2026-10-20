@@ -1,5 +1,6 @@
 export { createChat, type ChatSDK, type ChatViewHandle } from "./core/createChat";
-export { linkify, type TextSegment } from "./core/linkify";
+export { linkify, type TextSegment, type LinkifyOptions } from "./core/linkify";
+export { parseMessage, type RichNode } from "./core/format";
 export type * from "./core/types";
 
 export { useChat } from "./react/useChat";
@@ -17,5 +18,5 @@ export { Separator, dayLabel, type SeparatorProps } from "./react/Separator";
 export { Timestamp, type TimestampProps } from "./react/Timestamp";
 export { TypingIndicator, type TypingIndicatorProps } from "./react/TypingIndicator";
 export { defaultLabels, type ChatLabels } from "./react/labels";
-export { SendIcon, ArrowDownIcon, RetryIcon, ChatIcon, CloseIcon, LinkIcon, CheckIcon, ClockIcon } from "./react/icons";
+export { SendIcon, ArrowDownIcon, RetryIcon, ChatIcon, CloseIcon, LinkIcon, CheckIcon, ClockIcon, ExternalLinkIcon } from "./react/icons";
 export { cn } from "./react/cn";
