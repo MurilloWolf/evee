@@ -25,7 +25,7 @@ export function ActionsMessage({ message, chat, labels = defaultLabels }: Messag
 
   return (
     <div className={cardClass}>
-      {message.text && <p className="mb-2 whitespace-pre-wrap wrap-break-word">{message.text}</p>}
+      {message.text && <p className="mb-2 whitespace-pre-wrap wrap-anywhere">{message.text}</p>}
       <div className="flex flex-wrap gap-2">
         {meta.actions?.map((action) => (
           <Button

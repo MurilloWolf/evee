@@ -140,13 +140,13 @@ export function MessageBubble({
       )}
     >
       {showAvatar && !own && <span className="w-8 shrink-0">{first && <AvatarComponent user={author} />}</span>}
-      <div className={cn("flex max-w-[75%] flex-col gap-1", own ? "items-end" : "items-start")}>
+      <div className={cn("flex min-w-0 max-w-[75%] flex-col gap-1", own ? "items-end" : "items-start")}>
         {showAuthorName && first && !own && author && (
           <span className={cn("px-1 text-xs font-medium text-evee-muted-foreground", classNames.author)}>{author.name}</span>
         )}
         <div
           className={cn(
-            "relative rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap wrap-break-word transition-opacity",
+            "relative rounded-2xl px-3 py-2 text-sm max-w-full whitespace-pre-wrap wrap-anywhere transition-opacity",
             own
               ? cn("rounded-br-sm bg-evee-bubble-own text-evee-bubble-own-foreground", classNames.bubbleOwn)
               : cn("rounded-bl-sm bg-evee-bubble-other text-evee-bubble-other-foreground", classNames.bubbleOther),

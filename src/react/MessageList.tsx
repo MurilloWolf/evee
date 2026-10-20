@@ -137,7 +137,7 @@ export function MessageList({
         role="log"
         aria-live="polite"
         aria-label={labels.messages}
-        className="h-full overflow-y-auto overscroll-contain px-3 py-2"
+        className="h-full overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-2"
       >
         {hasMore && (
           <div className="flex justify-center py-2">
