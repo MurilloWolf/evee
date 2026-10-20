@@ -1,6 +1,6 @@
 {
   "name": "evee",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Headless-friendly chat SDK + React components (Tailwind v4, shadcn tokens)",
   "license": "MIT",
   "type": "module",

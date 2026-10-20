@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ComponentType, type MouseEvent } from "react";
 import type { ChatSDK } from "../core/createChat";
 import type { ChatMessage } from "../core/types";
+import { ActionsMessage } from "./ActionsMessage";
 import { Avatar } from "./Avatar";
 import { Button } from "./Button";
 import { cn } from "./cn";
@@ -9,6 +10,7 @@ import { defaultLabels, type ChatLabels } from "./labels";
 import { MessageBubble, type BubbleClassNames, type LinkComponent } from "./MessageBubble";
 import type { MessageLink } from "./MessageLink";
 import { Separator, dayLabel } from "./Separator";
+import { SurveyMessage } from "./SurveyMessage";
 import { TypingIndicator } from "./TypingIndicator";
 import { useChat } from "./useChat";
 
@@ -16,7 +18,15 @@ export interface MessageRendererProps {
   message: ChatMessage;
   own: boolean;
   chat: ChatSDK;
+  /** Always passed by <MessageList />. */
+  labels?: ChatLabels;
 }
+
+/** Built-in renderers; `renderers` with the same kind override them. */
+export const defaultRenderers: Record<string, ComponentType<MessageRendererProps>> = {
+  actions: ActionsMessage,
+  survey: SurveyMessage,
+};
 
 export interface MessageListComponents {
   Bubble?: typeof MessageBubble;
@@ -30,7 +40,7 @@ export interface MessageListProps {
   chat: ChatSDK;
   labels?: ChatLabels;
   components?: MessageListComponents;
-  /** Custom renderers keyed by `message.kind`. */
+  /** Custom renderers keyed by `message.kind`, merged over `defaultRenderers` ("actions", "survey"). */
   renderers?: Record<string, ComponentType<MessageRendererProps>>;
   linkComponent?: LinkComponent;
   className?: string;
@@ -144,7 +154,7 @@ export function MessageList({
           const unread = message.id === unreadMarkerId;
           const own = message.authorId === currentUser.id;
           const first = newDay || unread || before?.authorId !== message.authorId;
-          const Renderer = message.kind ? renderers[message.kind] : undefined;
+          const Renderer = message.kind ? (renderers[message.kind] ?? defaultRenderers[message.kind]) : undefined;
 
           return (
             <Fragment key={message.id}>
@@ -158,7 +168,7 @@ export function MessageList({
                     animated.has(message.id) && "motion-safe:animate-evee-message-in",
                   )}
                 >
-                  <Renderer message={message} own={own} chat={chat} />
+                  <Renderer message={message} own={own} chat={chat} labels={labels} />
                 </div>
               ) : (
                 <Bubble

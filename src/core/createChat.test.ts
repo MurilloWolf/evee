@@ -139,4 +139,35 @@ describe("createChat", () => {
     chat.setUnreadCount(4.6);
     expect(chat.getState().unreadCount).toBe(4);
   });
+
+  it("runAction: pending → merges returned meta; emits action", async () => {
+    let resolve!: (v: { meta: object }) => void;
+    const onAction = vi.fn(() => new Promise<{ meta: object }>((r) => (resolve = r)));
+    const chat = setup({ onAction, messages: [{ id: "s", authorId: "x", text: "", createdAt: new Date(), kind: "survey", meta: { surveyId: "1" } }] });
+    const onEvent = vi.fn();
+    chat.on("action", onEvent);
+    const done = chat.runAction("s", "survey.submit", { rating: 5 });
+    expect(chat.getState().messages[0]!.meta).toEqual({ surveyId: "1", actionPending: "survey.submit" });
+    void chat.runAction("s", "survey.submit", { rating: 5 }); // ignored while pending
+    resolve({ meta: { answered: true } });
+    await done;
+    expect(onAction).toHaveBeenCalledOnce();
+    expect(onAction.mock.calls[0]).toEqual([expect.objectContaining({ id: "s" }), { id: "survey.submit", value: { rating: 5 } }]);
+    expect(onEvent).toHaveBeenCalledOnce();
+    expect(chat.getState().messages[0]!.meta).toEqual({ surveyId: "1", answered: true });
+  });
+
+  it("runAction: on reject clears pending, sets actionError and emits error", async () => {
+    const onError = vi.fn();
+    const chat = setup({
+      onAction: async () => {
+        throw new Error("já respondida");
+      },
+      messages: [{ id: "s", authorId: "x", text: "", createdAt: new Date(), meta: { surveyId: "1" } }],
+    });
+    chat.on("error", onError);
+    await chat.runAction("s", "survey.submit");
+    expect(chat.getState().messages[0]!.meta).toEqual({ surveyId: "1", actionError: "já respondida" });
+    expect(onError).toHaveBeenCalledOnce();
+  });
 });

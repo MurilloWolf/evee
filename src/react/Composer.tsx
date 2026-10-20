@@ -4,6 +4,7 @@ import { IconButton } from "./Button";
 import { cn } from "./cn";
 import { SendIcon } from "./icons";
 import { defaultLabels, type ChatLabels } from "./labels";
+import { textareaClass } from "./Textarea";
 import { useChat } from "./useChat";
 
 export interface ComposerProps {
@@ -64,8 +65,8 @@ export function Composer({
           onChange={(e) => chat.setDraft(e.target.value)}
           onKeyDown={onKeyDown}
           className={cn(
-            "max-h-40 min-h-9 flex-1 resize-none rounded-md border border-evee-input bg-transparent px-3 py-2 text-sm outline-none [field-sizing:content]",
-            "placeholder:text-evee-muted-foreground focus-visible:ring-2 focus-visible:ring-evee-ring disabled:cursor-not-allowed disabled:opacity-50",
+            textareaClass,
+            "max-h-40 min-h-9 flex-1 resize-none [field-sizing:content]",
             over && "border-evee-destructive focus-visible:ring-evee-destructive",
             textareaClassName,
           )}

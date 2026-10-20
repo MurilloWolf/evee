@@ -1,4 +1,5 @@
 import type {
+  ActionMeta,
   ChatConfig,
   ChatHeaderState,
   ChatEvents,
@@ -46,6 +47,7 @@ export function createChat(options: CreateChatOptions) {
     header = null,
     open = true,
     onSend,
+    onAction,
     generateId = defaultId,
     ...config
   } = options;
@@ -98,6 +100,13 @@ export function createChat(options: CreateChatOptions) {
     }
   }
 
+  // Current meta as an object, without the action fields.
+  function baseMeta(id: string) {
+    const meta = state.messages.find((m) => m.id === id)?.meta;
+    const { actionPending: _p, actionError: _e, ...rest } = (meta && typeof meta === "object" ? meta : {}) as ActionMeta;
+    return rest;
+  }
+
   const chat = {
     getState: () => state,
     subscribe(listener: Listener) {
@@ -132,6 +141,26 @@ export function createChat(options: CreateChatOptions) {
       if (!message || message.status !== "failed") return;
       patchMessage(id, { status: "pending" });
       void deliver({ ...message, status: "pending" });
+    },
+
+    // --- actions ---
+    /** Runs `onAction` for a message: sets `meta.actionPending`, then merges the result or sets `meta.actionError`. */
+    async runAction(messageId: string, actionId: string, value?: unknown) {
+      const message = state.messages.find((m) => m.id === messageId);
+      if (!message || (message.meta as ActionMeta | undefined)?.actionPending) return;
+      const action = { id: actionId, value };
+      emit("action", { message, action });
+      if (!onAction) return;
+      patchMessage(messageId, { meta: { ...baseMeta(messageId), actionPending: actionId } });
+      try {
+        const server = await onAction(message, action);
+        const meta = { ...baseMeta(messageId), ...(server?.meta as object | undefined) };
+        patchMessage(messageId, { ...(server ?? {}), meta });
+      } catch (error) {
+        const actionError = error instanceof Error ? error.message : String(error);
+        patchMessage(messageId, { meta: { ...baseMeta(messageId), actionError } });
+        emit("error", { message, error });
+      }
     },
 
     // --- messages ---

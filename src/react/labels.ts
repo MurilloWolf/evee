@@ -15,6 +15,14 @@ export interface ChatLabels {
   close: string;
   unreadBadge: (count: number) => string;
   dismiss: string;
+  actionFailed: string;
+  rating: string;
+  star: (n: number) => string;
+  surveyTitle: string;
+  surveyReason: string;
+  surveySubmit: string;
+  surveySubmitting: string;
+  surveyThanks: string;
 }
 
 export const defaultLabels: ChatLabels = {
@@ -34,4 +42,12 @@ export const defaultLabels: ChatLabels = {
   close: "Fechar chat",
   unreadBadge: (n) => (n === 1 ? "1 mensagem não lida" : `${n} mensagens não lidas`),
   dismiss: "Dispensar",
+  actionFailed: "Não foi possível concluir. Tente novamente.",
+  rating: "Avaliação",
+  star: (n) => (n === 1 ? "1 estrela" : `${n} estrelas`),
+  surveyTitle: "Como foi o seu atendimento?",
+  surveyReason: "Conte o que não foi bom (obrigatório)",
+  surveySubmit: "Enviar avaliação",
+  surveySubmitting: "Enviando...",
+  surveyThanks: "Obrigado pela avaliação!",
 };

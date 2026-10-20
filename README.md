@@ -10,7 +10,7 @@ Stack: React ≥ 18, Tailwind v4. Herda o tema shadcn do host por padrão.
 
 ```jsonc
 // package.json
-"evee": "github:MurilloWolf/evee#v0.2.0"
+"evee": "github:MurilloWolf/evee#v0.3.0"
 ```
 
 ```ts
@@ -80,6 +80,7 @@ const chat = createChat({ ..., open: false }); // começa fechado
 | Grupo | Métodos |
 | --- | --- |
 | Envio | `sendMessage(text?)` (sem argumento envia o rascunho), `retry(id)` |
+| Ações | `runAction(messageId, actionId, value?)`: chama `onAction` (ver [Ações e pesquisa](#ações-e-pesquisa)) |
 | Mensagens | `addMessage(msg)` (mensagem recebida), `setMessages(list)`, `prependMessages(list, hasMore?)`, `updateMessage(id, patch)`, `removeMessage(id)`, `clear()`, `addUsers(...users)` |
 | Input | `disableInput(reason?)`, `enableInput()`, `setMaxChar(n)`, `setPlaceholder(t)`, `setDraft(t)`, `focusInput()` |
 | Header | `setTitle(t)`, `setSubtitle(t)`, `setAvatar(url \| null)`, `setHeader(header \| null)` |
@@ -89,7 +90,34 @@ const chat = createChat({ ..., open: false }); // começa fechado
 | Histórico | `setHasMore(bool)`, `loadMore()`: dispara o evento `loadMore`, e o host responde com `prependMessages` |
 | Leitura | `getState()`, `subscribe(fn)`, `on(evento, fn)` → retorna a função de unsubscribe; hook `useChat(chat)` |
 
-Eventos: `send`, `message`, `loadMore`, `linkClick`, `inputChange`, `error`, `open`, `close`.
+Eventos: `send`, `message`, `loadMore`, `linkClick`, `inputChange`, `error`, `action`, `open`, `close`.
+
+## Ações e pesquisa
+
+Mensagens podem ter botões que chamam o host. O canal é `onAction`, que funciona como o `onSend`:
+
+```ts
+const chat = createChat({
+  ...,
+  onAction: async (message, action) => {
+    // action = { id, value? }
+    if (action.id === "survey.submit") {
+      const saved = await api.post(`/support/surveys/${message.meta.surveyId}/answer`, action.value);
+      return saved; // campos mesclados na mensagem; `meta` é mesclado (raso)
+    }
+    // throw → meta.actionError = error.message, e o evento `error` é emitido
+  },
+});
+```
+
+`chat.runAction(messageId, actionId, value?)` emite o evento `action` e marca `meta.actionPending = actionId`. Depois aguarda o `onAction` e mescla o retorno. Se ele lançar erro, limpa o pending e grava `meta.actionError`. Enquanto há uma ação pendente, novas chamadas na mesma mensagem são ignoradas.
+
+Dois renderers vêm registrados por padrão (o host sobrescreve via `renderers`):
+
+- **`kind: "actions"`** (`ActionsMessage`): o texto mais um botão por item de `meta.actions: { id, label, variant? }[]`. Cada clique chama `runAction(message.id, id)`. Os botões ficam desabilitados com ação pendente ou com `meta.done: true` (devolva `{ meta: { done: true } }` no `onAction`).
+- **`kind: "survey"`** (`SurveyMessage`): 1 a 5 estrelas. Com nota ≤ 2, o motivo é obrigatório. O envio chama `runAction(message.id, "survey.submit", { rating, reason? })`. Com `meta.answered: true`, mostra "Obrigado pela avaliação!". Como o estado vem do `meta`, um reload mantém o agradecimento. O título é o `text` da mensagem ou, se vazio, `labels.surveyTitle`.
+
+Primitivos exportados: `StarRating` (`role="radiogroup"`, setas/Home/End), `Textarea`, `StarIcon`.
 
 ## Customização
 
@@ -100,7 +128,7 @@ Eventos: `send`, `message`, `loadMore`, `linkClick`, `inputChange`, `error`, `op
 - `renderers={{ [kind]: Component }}`: mensagens com `kind` usam esse componente (ex.: um card "Abrir agenda").
 - `linkComponent={NextLink}`: componente usado para renderizar os links.
 - `labels={{ send, loadMore, unread, typing: (n) => ..., ... }}`: textos da interface (padrão em pt-BR).
-- Todos os componentes também são exportados soltos (`ChatHeader`, `ChatWidget`, `MessageList`, `Composer`, `MessageBubble`, `Avatar`, `Button`, `IconButton`, `Separator`, `Timestamp`, `TypingIndicator`).
+- Todos os componentes também são exportados soltos (`ChatHeader`, `ChatWidget`, `MessageList`, `Composer`, `MessageBubble`, `Avatar`, `Button`, `IconButton`, `Textarea`, `StarRating`, `ActionsMessage`, `SurveyMessage`, `Separator`, `Timestamp`, `TypingIndicator`).
 
 ## Tema
 

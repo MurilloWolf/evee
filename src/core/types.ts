@@ -112,11 +112,31 @@ export interface ChatEvents {
   linkClick: LinkClickEvent;
   inputChange: string;
   error: { message: ChatMessage; error: unknown };
+  action: { message: ChatMessage; action: ChatAction };
   open: void;
   close: void;
 }
 
 export type SendHandler = (message: ChatMessage) => Promise<Partial<ChatMessage> | void> | Partial<ChatMessage> | void;
+
+/** An action triggered from a message (button click, survey submit, ...). */
+export interface ChatAction {
+  id: string;
+  value?: unknown;
+}
+
+/** Fields `runAction` writes into `message.meta`. */
+export interface ActionMeta {
+  /** Id of the action in flight. */
+  actionPending?: string;
+  /** Error message of the last failed action. */
+  actionError?: string;
+}
+
+export type ActionHandler = (
+  message: ChatMessage,
+  action: ChatAction,
+) => Promise<Partial<ChatMessage> | void> | Partial<ChatMessage> | void;
 
 export interface CreateChatOptions extends Partial<ChatConfig> {
   currentUser: ChatUser;
@@ -128,6 +148,8 @@ export interface CreateChatOptions extends Partial<ChatConfig> {
   open?: boolean;
   /** Called on send. Return/resolve server fields (e.g. real id) to merge; throw/reject to mark as failed. */
   onSend?: SendHandler;
+  /** Called by `runAction`. Return/resolve fields to merge (`meta` is merged shallowly); throw/reject to set `meta.actionError`. */
+  onAction?: ActionHandler;
   /** Id generator for outgoing messages. */
   generateId?: () => string;
 }

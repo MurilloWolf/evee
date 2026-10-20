@@ -112,6 +112,14 @@ const chat = createChat({
     await new Promise((r) => setTimeout(r, 600));
     if (++sendCount % 3 === 0) throw new Error("falha simulada");
   },
+  // Fake backend for message actions (kind "actions" / "survey").
+  onAction: async (message, action) => {
+    await new Promise((r) => setTimeout(r, 600));
+    if (action.id === "fail") throw new Error("Falha simulada. Tente novamente.");
+    if (action.id === "survey.submit") return { meta: { ...(message.meta as object), answered: true, ...(action.value as object) } };
+    setTimeout(() => chat.addMessage(adminMsg(`Você escolheu: ${action.id}`)), 300);
+    return { meta: { ...(message.meta as object), done: true } };
+  },
 });
 
 chat.on("loadMore", () => {
@@ -144,6 +152,7 @@ function EventLog() {
       chat.on("message", (m) => log(`message: "${m.text.slice(0, 40)}"`)),
       chat.on("loadMore", () => log("loadMore")),
       chat.on("error", ({ error }) => log(`error: ${String(error)}`)),
+      chat.on("action", ({ message, action }) => log(`action: ${action.id} em ${message.id} ${JSON.stringify(action.value ?? "")}`)),
       chat.on("linkClick", (e) => {
         e.preventDefault();
         log(`linkClick: ${e.url.pathname}${e.url.search} (navegação interceptada)`);
@@ -263,6 +272,33 @@ function Controls({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
           }
         >
           card customizado (kind)
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() =>
+            chat.addMessage(
+              adminMsg("Conseguiu remarcar a consulta?", {
+                kind: "actions",
+                meta: {
+                  actions: [
+                    { id: "sim", label: "Sim, resolvido", variant: "default" },
+                    { id: "nao", label: "Ainda não" },
+                    { id: "fail", label: "Simular erro", variant: "ghost" },
+                  ],
+                },
+              }),
+            )
+          }
+        >
+          ações (kind "actions")
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => chat.addMessage(adminMsg("", { kind: "survey", meta: { surveyId: `s-${seq}` } }))}
+        >
+          pesquisa (kind "survey")
         </Button>
         <Button
           size="sm"
